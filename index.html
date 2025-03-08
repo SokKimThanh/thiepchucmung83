@@ -172,14 +172,14 @@
     <div class="image-container">
         <!-- Ban đầu chỉ hiển thị nút "Mở Quà" -->
         <button class="button" id="giftButton" onclick="startVideo()">Mở Quà</button>
-        <!-- Các nút điều khiển xuất hiện sau khi video chạy xong -->
+        <!-- Nút "Mở Thiệp" hiển thị sau khi mở quà, nhưng thiệp chưa mở -->
+        <button class="button hidden" id="toggleGiftButton" onclick="toggleGift()">Mở Thiệp</button>
+        <!-- Các nút điều khiển video -->
         <button class="button hidden" id="videoButton" onclick="toggleVideo()">Tắt Video</button>
         <button class="button hidden" id="toggleSoundButton" onclick="toggleSound()">Tắt Âm Thanh</button>
-        <button class="button hidden" id="closeGiftButton" onclick="toggleGift()">Tắt Thiệp</button>
     </div>
-    <!-- Phần thiệp được ẩn ban đầu; chỉ hiển thị khi video kết thúc -->
+    <!-- Phần thiệp, ẩn ban đầu -->
     <div id="gift" class="hidden">
-        <p id="congratsText">🎁 Chúc mừng! Bạn đã nhận được một món quà bất ngờ!</p>
         <div class="electric-effect"></div>
         <img src="./public/images/thiep8325vn1.png" alt="Hình chúc mừng 8/3">
     </div>
@@ -191,8 +191,9 @@
     <script>
         var player;
         var videoPaused = false;
+        var giftOpened = false; // trạng thái mở thiệp
 
-        // Hàm này sẽ được gọi khi API YouTube sẵn sàng
+        // Hàm này được gọi khi API YouTube sẵn sàng
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('ytplayer', {
                 height: '100%',
@@ -200,11 +201,11 @@
                 videoId: 'RcyBVb7tRH0',
                 playerVars: {
                     autoplay: 1,
-                    mute: 0, // Bật âm thanh
+                    mute: 0,      // Bật âm thanh
                     controls: 0,
                     modestbranding: 1,
                     rel: 0,
-                    loop: 0,  // Không loop
+                    loop: 0,      // Không lặp để bắt sự kiện kết thúc
                     enablejsapi: 1
                 },
                 events: {
@@ -213,44 +214,70 @@
             });
         }
 
-        // Khi video kết thúc, mở thiệp tự động và hiển thị các nút điều khiển
+        // Khi video kết thúc, ẩn video, cập nhật nút video thành "Phát Lại" và mở thiệp nếu chưa mở
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
-                openGiftCard();
+                var videoBg = document.getElementById('videoBg');
+                videoBg.style.opacity = "0";
+                setTimeout(() => { videoBg.classList.add('hidden'); }, 1500);
+                document.getElementById('videoButton').innerText = "▶"; // biểu tượng phát lại
+                videoPaused = true;
+                // Nếu thiệp chưa mở, tự mở thiệp và ẩn nút "Mở Thiệp"
+                if (!giftOpened) {
+                    openGiftCard();
+                    document.getElementById('toggleGiftButton').classList.add('hidden');
+                }
             }
         }
 
-        // Khi nhấn nút "Mở Quà": ẩn nút "Mở Quà", hiển thị video và tự động bật âm thanh.
-        // Không mở thiệp ngay, thiệp chỉ mở khi video kết thúc.
+        // Khi nhấn "Mở Quà": khởi chạy video (không mở thiệp)
         function startVideo() {
             document.getElementById('giftButton').classList.add('hidden');
             var videoBg = document.getElementById('videoBg');
             videoBg.classList.remove('hidden');
-            setTimeout(() => {
-                videoBg.style.opacity = '1';
-            }, 100);
+            setTimeout(() => { videoBg.style.opacity = '1'; }, 100);
             // Phát video và bật âm thanh
             if (player && player.playVideo) {
                 player.unMute();
                 player.playVideo();
             }
             videoPaused = false;
-            // Hiện các nút điều khiển bổ sung (cho video)
+            // Hiện các nút điều khiển cho video
             document.getElementById('videoButton').classList.remove('hidden');
             document.getElementById('toggleSoundButton').classList.remove('hidden');
-            // Nút "Tắt Thiệp" vẫn ẩn vì thiệp chưa mở
-            document.getElementById('closeGiftButton').classList.add('hidden');
+            // Hiển thị nút "Mở Thiệp" vì thiệp chưa mở
+            document.getElementById('toggleGiftButton').classList.remove('hidden');
+            document.getElementById('toggleGiftButton').innerText = "Mở Thiệp";
+            giftOpened = false;
         }
 
-        // Khi video kết thúc, mở thiệp (gift) và hiển thị nút "Tắt Thiệp"
+        // Hàm mở thiệp (gift card)
         function openGiftCard() {
             const gift = document.getElementById('gift');
             gift.classList.remove('hidden');
             setTimeout(() => {
                 gift.style.opacity = '1';
             }, 100);
-            // Hiện nút "Tắt Thiệp" để cho phép ẩn/hiện thiệp
-            document.getElementById('closeGiftButton').classList.remove('hidden');
+            giftOpened = true;
+            // Cập nhật nút "Mở Thiệp" thành "Tắt Thiệp"
+            document.getElementById('toggleGiftButton').innerText = "Tắt Thiệp";
+        }
+
+        // Hàm chuyển đổi ẩn/hiện thiệp khi nhấn nút "Mở/Tắt Thiệp"
+        function toggleGift() {
+            const gift = document.getElementById('gift');
+            const btn = document.getElementById('toggleGiftButton');
+            if (gift.style.opacity === "1") {
+                gift.style.opacity = "0";
+                setTimeout(() => { gift.classList.add('hidden'); }, 1500);
+                giftOpened = false;
+                btn.innerText = "Mở Thiệp";
+            } else {
+                gift.classList.remove('hidden');
+                setTimeout(() => { gift.style.opacity = "1"; }, 100);
+                giftOpened = true;
+                btn.innerText = "Tắt Thiệp";
+            }
         }
 
         // Hàm chuyển đổi giữa tạm dừng và phát lại video (không reset về đầu)
@@ -262,7 +289,7 @@
                 videoPaused = true;
                 videoBg.style.opacity = "0";
                 setTimeout(() => { videoBg.classList.add('hidden'); }, 1500);
-                videoButton.innerText = "Mở Video";
+                videoButton.innerText = "▶";  // biểu tượng phát lại
             } else {
                 videoBg.classList.remove('hidden');
                 setTimeout(() => { videoBg.style.opacity = "1"; }, 100);
@@ -281,21 +308,6 @@
             } else {
                 player.mute();
                 btn.innerText = "Bật Âm Thanh";
-            }
-        }
-
-        // Hàm chuyển đổi ẩn/hiện thiệp (gift)
-        function toggleGift() {
-            const gift = document.getElementById('gift');
-            const btn = document.getElementById('closeGiftButton');
-            if (gift.style.opacity === "1") {
-                gift.style.opacity = "0";
-                setTimeout(() => { gift.classList.add('hidden'); }, 1500);
-                btn.innerText = "Mở Thiệp";
-            } else {
-                gift.classList.remove('hidden');
-                setTimeout(() => { gift.style.opacity = "1"; }, 100);
-                btn.innerText = "Tắt Thiệp";
             }
         }
     </script>
