@@ -17,6 +17,19 @@
             min-height: 100vh;
         }
 
+        /* Video nền, ẩn ban đầu */
+        #videoBg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
         h1 {
             font-size: 50px;
             margin-top: 50px;
@@ -134,7 +147,7 @@
             }
         }
 
-        /* Định vị phần quà (ảnh và hiệu ứng điện) tại trung tâm */
+        /* Định vị phần quà (thiệp) tại trung tâm */
         #gift {
             position: absolute;
             top: 50%;
@@ -146,9 +159,18 @@
     </style>
 </head>
 <body>
+    <!-- Video nền, ẩn ban đầu -->
+    <video id="videoBg" class="hidden" autoplay loop>
+        <source src="public/videos/tosn8thang3.mp4" type="video/mp4">
+        Trình duyệt của bạn không hỗ trợ video.
+    </video>
+
     <h1>Chúc Mừng Ngày Quốc Tế Phụ Nữ 8/3</h1>
     <div class="image-container">
         <button class="button" id="giftButton" onclick="revealGift()">Mở Quà</button>
+        <button class="button" id="videoButton" onclick="openVideo()">Mở Video</button>
+        <button class="button" id="toggleSoundButton" onclick="toggleSound()">Bật Âm Thanh</button>
+        <button class="button" id="closeGiftButton" onclick="closeGift()">Tắt Thiệp</button>
     </div>
     <div id="gift" class="hidden">
         <p id="congratsText">🎁 Chúc mừng! Bạn đã nhận được một món quà bất ngờ!</p>
@@ -164,7 +186,7 @@
             const flowerImages = [
                 'public/images/flower-1.png',
                 'public/images/flower-2.png',
-                'public/images/flower-3.png',
+                'public/images/flower-3.png'
             ];
             // Sản xuất 5 hoa mỗi lần
             for (let i = 0; i < 5; i++) {
@@ -181,11 +203,11 @@
             // Gọi lại hàm tạo hoa sau 3000ms (3 giây)
             setTimeout(createFallingFlowers, 3000);
         }
-
         document.addEventListener("DOMContentLoaded", () => {
             createFallingFlowers();
         });
     </script>
+
     <script>
         const messages = [
             "Chúc bạn luôn hạnh phúc, rạng rỡ như những đóa hoa xinh đẹp!",
@@ -213,6 +235,45 @@
             setTimeout(() => {
                 document.getElementById('gift').style.opacity = '1';
             }, 100);
+            // Hiện video nền bằng cách loại bỏ lớp hidden và tăng opacity
+            const video = document.getElementById('videoBg');
+            video.classList.remove('hidden');
+            setTimeout(() => {
+                video.style.opacity = '1';
+                video.play(); // gọi play() để đảm bảo video chạy
+            }, 100);
+        }
+
+
+        // Hàm mở video riêng biệt khi nhấn nút "Mở Video"
+        function openVideo() {
+            const video = document.getElementById('videoBg');
+            video.classList.remove('hidden');
+            video.style.opacity = '1';
+        }
+
+        // Hàm tắt thiệp
+        function closeGift() {
+            document.getElementById('gift').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('gift').classList.add('hidden');
+            }, 1500);
+            // Nếu muốn tắt luôn video nền, uncomment dòng dưới
+            // document.getElementById('videoBg').style.opacity = '0';
+        }
+
+        // Hàm chuyển đổi bật/tắt âm thanh
+        function toggleSound() {
+            const video = document.getElementById('videoBg');
+            const btn = document.getElementById('toggleSoundButton');
+            // Nếu video đang bị tắt âm thanh, bật âm thanh
+            if (video.muted) {
+                video.muted = false;
+                btn.innerText = "Tắt Âm Thanh";
+            } else {
+                video.muted = true;
+                btn.innerText = "Bật Âm Thanh";
+            }
         }
     </script>
 </body>
