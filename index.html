@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chúc Mừng 8/3</title>
     <style>
         body {
@@ -16,19 +16,24 @@
             position: relative;
             min-height: 100vh;
         }
-
-        /* Video nền, ẩn ban đầu */
+        /* YouTube video nền, ẩn ban đầu */
         #videoBg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
             z-index: -1;
             opacity: 0;
             transition: opacity 1.5s ease-in-out;
         }
+
+            #videoBg iframe {
+                width: 100%;
+                height: 100%;
+                border: 0;
+                pointer-events: none;
+            }
 
         h1 {
             font-size: 50px;
@@ -40,7 +45,7 @@
             font-size: 24px;
             margin-top: 20px;
             padding: 20px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255,255,255,0.2);
             border-radius: 10px;
             display: inline-block;
             animation: fadeIn 3s ease-in-out;
@@ -95,7 +100,7 @@
             height: 480px;
             border-radius: 10px;
             background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 70%);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.6);
+            box-shadow: 0 0 20px rgba(0,255,255,0.8), 0 0 40px rgba(0,255,255,0.6);
             transform: translate(-50%, -50%);
             animation: electricGlow 1.5s infinite alternate;
         }
@@ -112,11 +117,11 @@
 
         @keyframes electricGlow {
             from {
-                box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.6);
+                box-shadow: 0 0 20px rgba(0,255,255,0.8), 0 0 40px rgba(0,255,255,0.6);
             }
 
             to {
-                box-shadow: 0 0 30px rgba(0, 255, 255, 1), 0 0 50px rgba(0, 255, 255, 0.8);
+                box-shadow: 0 0 30px rgba(0,255,255,1), 0 0 50px rgba(0,255,255,0.8);
             }
         }
 
@@ -146,8 +151,7 @@
                 transform: translateY(100vh);
             }
         }
-
-        /* Định vị phần quà (thiệp) tại trung tâm */
+        /* Phần thiệp (gift) */
         #gift {
             position: absolute;
             top: 50%;
@@ -159,19 +163,21 @@
     </style>
 </head>
 <body>
-    <!-- Video nền, ẩn ban đầu -->
-    <video id="videoBg" class="hidden" autoplay loop>
-        <source src="public/videos/tosn8thang3.mp4" type="video/mp4">
-        Trình duyệt của bạn không hỗ trợ video.
-    </video>
+    <!-- YouTube video nền, ẩn ban đầu -->
+    <div id="videoBg" class="hidden">
+        <div id="ytplayer"></div>
+    </div>
 
     <h1>Chúc Mừng Ngày Quốc Tế Phụ Nữ 8/3</h1>
     <div class="image-container">
-        <button class="button" id="giftButton" onclick="revealGift()">Mở Quà</button>
-        <button class="button" id="videoButton" onclick="openVideo()">Mở Video</button>
-        <button class="button" id="toggleSoundButton" onclick="toggleSound()">Bật Âm Thanh</button>
-        <button class="button" id="closeGiftButton" onclick="closeGift()">Tắt Thiệp</button>
+        <!-- Ban đầu chỉ hiển thị nút "Mở Quà" -->
+        <button class="button" id="giftButton" onclick="startVideo()">Mở Quà</button>
+        <!-- Các nút điều khiển xuất hiện sau khi video chạy xong -->
+        <button class="button hidden" id="videoButton" onclick="toggleVideo()">Tắt Video</button>
+        <button class="button hidden" id="toggleSoundButton" onclick="toggleSound()">Tắt Âm Thanh</button>
+        <button class="button hidden" id="closeGiftButton" onclick="toggleGift()">Tắt Thiệp</button>
     </div>
+    <!-- Phần thiệp được ẩn ban đầu; chỉ hiển thị khi video kết thúc -->
     <div id="gift" class="hidden">
         <p id="congratsText">🎁 Chúc mừng! Bạn đã nhận được một món quà bất ngờ!</p>
         <div class="electric-effect"></div>
@@ -180,15 +186,128 @@
 
     <div class="grass"></div>
 
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        // Hàm tạo hiệu ứng hoa rơi từ thư mục public/images với tốc độ sản xuất hoa chậm hơn
+        var player;
+        var videoPaused = false;
+
+        // Hàm này sẽ được gọi khi API YouTube sẵn sàng
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('ytplayer', {
+                height: '100%',
+                width: '100%',
+                videoId: 'RcyBVb7tRH0',
+                playerVars: {
+                    autoplay: 1,
+                    mute: 0, // Bật âm thanh
+                    controls: 0,
+                    modestbranding: 1,
+                    rel: 0,
+                    loop: 0,  // Không loop
+                    enablejsapi: 1
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // Khi video kết thúc, mở thiệp tự động và hiển thị các nút điều khiển
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                openGiftCard();
+            }
+        }
+
+        // Khi nhấn nút "Mở Quà": ẩn nút "Mở Quà", hiển thị video và tự động bật âm thanh.
+        // Không mở thiệp ngay, thiệp chỉ mở khi video kết thúc.
+        function startVideo() {
+            document.getElementById('giftButton').classList.add('hidden');
+            var videoBg = document.getElementById('videoBg');
+            videoBg.classList.remove('hidden');
+            setTimeout(() => {
+                videoBg.style.opacity = '1';
+            }, 100);
+            // Phát video và bật âm thanh
+            if (player && player.playVideo) {
+                player.unMute();
+                player.playVideo();
+            }
+            videoPaused = false;
+            // Hiện các nút điều khiển bổ sung (cho video)
+            document.getElementById('videoButton').classList.remove('hidden');
+            document.getElementById('toggleSoundButton').classList.remove('hidden');
+            // Nút "Tắt Thiệp" vẫn ẩn vì thiệp chưa mở
+            document.getElementById('closeGiftButton').classList.add('hidden');
+        }
+
+        // Khi video kết thúc, mở thiệp (gift) và hiển thị nút "Tắt Thiệp"
+        function openGiftCard() {
+            const gift = document.getElementById('gift');
+            gift.classList.remove('hidden');
+            setTimeout(() => {
+                gift.style.opacity = '1';
+            }, 100);
+            // Hiện nút "Tắt Thiệp" để cho phép ẩn/hiện thiệp
+            document.getElementById('closeGiftButton').classList.remove('hidden');
+        }
+
+        // Hàm chuyển đổi giữa tạm dừng và phát lại video (không reset về đầu)
+        function toggleVideo() {
+            const videoBg = document.getElementById('videoBg');
+            const videoButton = document.getElementById('videoButton');
+            if (!videoPaused) {
+                player.pauseVideo();
+                videoPaused = true;
+                videoBg.style.opacity = "0";
+                setTimeout(() => { videoBg.classList.add('hidden'); }, 1500);
+                videoButton.innerText = "Mở Video";
+            } else {
+                videoBg.classList.remove('hidden');
+                setTimeout(() => { videoBg.style.opacity = "1"; }, 100);
+                player.playVideo();
+                videoPaused = false;
+                videoButton.innerText = "Tắt Video";
+            }
+        }
+
+        // Hàm chuyển đổi bật/tắt âm thanh cho video YouTube
+        function toggleSound() {
+            const btn = document.getElementById('toggleSoundButton');
+            if (btn.innerText === "Bật Âm Thanh") {
+                player.unMute();
+                btn.innerText = "Tắt Âm Thanh";
+            } else {
+                player.mute();
+                btn.innerText = "Bật Âm Thanh";
+            }
+        }
+
+        // Hàm chuyển đổi ẩn/hiện thiệp (gift)
+        function toggleGift() {
+            const gift = document.getElementById('gift');
+            const btn = document.getElementById('closeGiftButton');
+            if (gift.style.opacity === "1") {
+                gift.style.opacity = "0";
+                setTimeout(() => { gift.classList.add('hidden'); }, 1500);
+                btn.innerText = "Mở Thiệp";
+            } else {
+                gift.classList.remove('hidden');
+                setTimeout(() => { gift.style.opacity = "1"; }, 100);
+                btn.innerText = "Tắt Thiệp";
+            }
+        }
+    </script>
+
+    <!-- Hiệu ứng hoa rơi -->
+    <script>
         function createFallingFlowers() {
             const flowerImages = [
                 'public/images/flower-1.png',
                 'public/images/flower-2.png',
                 'public/images/flower-3.png'
             ];
-            // Sản xuất 5 hoa mỗi lần
             for (let i = 0; i < 5; i++) {
                 let flower = document.createElement('img');
                 flower.classList.add('flower');
@@ -200,81 +319,11 @@
                 document.body.appendChild(flower);
                 setTimeout(() => { flower.remove(); }, (Math.random() * 3 + 2) * 1000);
             }
-            // Gọi lại hàm tạo hoa sau 3000ms (3 giây)
             setTimeout(createFallingFlowers, 3000);
         }
         document.addEventListener("DOMContentLoaded", () => {
             createFallingFlowers();
         });
-    </script>
-
-    <script>
-        const messages = [
-            "Chúc bạn luôn hạnh phúc, rạng rỡ như những đóa hoa xinh đẹp!",
-            "Chúc bạn có một ngày 8/3 thật ý nghĩa và tràn đầy yêu thương!",
-            "Mong rằng bạn luôn mạnh mẽ, tự tin và đạt được mọi ước mơ của mình!",
-            "Chúc bạn luôn xinh đẹp, hạnh phúc và thành công trong cuộc sống!",
-            "Hôm nay là ngày đặc biệt dành cho bạn! Hãy tận hưởng nó thật trọn vẹn!"
-        ];
-
-        function showRandomMessage() {
-            const messageBox = document.getElementById('message');
-            const randomIndex = Math.floor(Math.random() * messages.length);
-            messageBox.innerText = messages[randomIndex];
-            document.getElementById('giftButton').classList.remove('hidden');
-        }
-
-        function revealGift() {
-            document.getElementById('gift').classList.remove('hidden');
-            document.getElementById('giftButton').classList.add('hidden');
-            // Ẩn chữ chúc mừng sau 3 giây
-            setTimeout(() => {
-                document.getElementById('congratsText').style.display = 'none';
-            }, 3000);
-            // Hiện quà (tức là tăng opacity của #gift)
-            setTimeout(() => {
-                document.getElementById('gift').style.opacity = '1';
-            }, 100);
-            // Hiện video nền bằng cách loại bỏ lớp hidden và tăng opacity
-            const video = document.getElementById('videoBg');
-            video.classList.remove('hidden');
-            setTimeout(() => {
-                video.style.opacity = '1';
-                video.play(); // gọi play() để đảm bảo video chạy
-            }, 100);
-        }
-
-
-        // Hàm mở video riêng biệt khi nhấn nút "Mở Video"
-        function openVideo() {
-            const video = document.getElementById('videoBg');
-            video.classList.remove('hidden');
-            video.style.opacity = '1';
-        }
-
-        // Hàm tắt thiệp
-        function closeGift() {
-            document.getElementById('gift').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('gift').classList.add('hidden');
-            }, 1500);
-            // Nếu muốn tắt luôn video nền, uncomment dòng dưới
-            // document.getElementById('videoBg').style.opacity = '0';
-        }
-
-        // Hàm chuyển đổi bật/tắt âm thanh
-        function toggleSound() {
-            const video = document.getElementById('videoBg');
-            const btn = document.getElementById('toggleSoundButton');
-            // Nếu video đang bị tắt âm thanh, bật âm thanh
-            if (video.muted) {
-                video.muted = false;
-                btn.innerText = "Tắt Âm Thanh";
-            } else {
-                video.muted = true;
-                btn.innerText = "Bật Âm Thanh";
-            }
-        }
     </script>
 </body>
 </html>
