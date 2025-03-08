@@ -13,6 +13,8 @@
             overflow: hidden;
             font-family: Arial, sans-serif;
             color: white;
+            position: relative;
+            min-height: 100vh;
         }
 
         h1 {
@@ -68,14 +70,13 @@
 
         img {
             width: 300px;
-            margin-top: 20px;
             border-radius: 15px;
             animation: float 3s infinite ease-in-out alternate;
         }
 
         .electric-effect {
             position: absolute;
-            top: 46%;
+            top: 50%;
             left: 50%;
             width: 320px;
             height: 480px;
@@ -84,26 +85,6 @@
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.6);
             transform: translate(-50%, -50%);
             animation: electricGlow 1.5s infinite alternate;
-
-            @media (max-width: 768px) {
-                top: 58%;
-                left: 50%;
-            }
-
-            @media (max-width: 500px) {
-                top: 67%;
-                left: 50%;
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
         }
 
         @keyframes float {
@@ -128,11 +109,19 @@
 
         .flower {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background: url('https://cdn-icons-png.flaticon.com/128/3534/3534066.png');
+            width: 50px;
             background-size: cover;
             animation: fall linear infinite;
+        }
+
+        .grass {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('./public/images/grass.png') repeat-x;
+            background-size: contain;
         }
 
         @keyframes fall {
@@ -144,41 +133,58 @@
                 transform: translateY(100vh);
             }
         }
+
+        /* Định vị phần quà (ảnh và hiệu ứng điện) tại trung tâm */
+        #gift {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
     </style>
 </head>
 <body>
     <h1>Chúc Mừng Ngày Quốc Tế Phụ Nữ 8/3</h1>
     <div class="image-container">
-
         <button class="button" id="giftButton" onclick="revealGift()">Mở Quà</button>
     </div>
     <div id="gift" class="hidden">
-        🎁 Chúc mừng! Bạn đã nhận được một món quà bất ngờ! 🎁
-        <br>
+        <p id="congratsText">🎁 Chúc mừng! Bạn đã nhận được một món quà bất ngờ!</p>
         <div class="electric-effect"></div>
         <img src="./public/images/thiep8325vn1.png" alt="Hình chúc mừng 8/3">
     </div>
+
+    <div class="grass"></div>
+
     <script>
-        function createFlower() {
-            const flower = document.createElement('div');
-            flower.classList.add('flower');
-            document.body.appendChild(flower);
-
-            let left = Math.random() * window.innerWidth;
-            let duration = Math.random() * 3 + 2;
-            let size = Math.random() * 20 + 10;
-
-            flower.style.left = left + 'px';
-            flower.style.animationDuration = duration + 's';
-            flower.style.width = size + 'px';
-            flower.style.height = size + 'px';
-
-            setTimeout(() => {
-                flower.remove();
-            }, duration * 1000);
+        // Hàm tạo hiệu ứng hoa rơi từ thư mục public/images với tốc độ sản xuất hoa chậm hơn
+        function createFallingFlowers() {
+            const flowerImages = [
+                'public/images/flower-1.png',
+                'public/images/flower-2.png',
+                'public/images/flower-3.png',
+            ];
+            // Sản xuất 5 hoa mỗi lần
+            for (let i = 0; i < 5; i++) {
+                let flower = document.createElement('img');
+                flower.classList.add('flower');
+                flower.src = flowerImages[Math.floor(Math.random() * flowerImages.length)];
+                flower.style.left = Math.random() * 100 + 'vw';
+                flower.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                flower.style.width = (Math.random() * 30 + 20) + 'px';
+                flower.style.position = 'absolute';
+                document.body.appendChild(flower);
+                setTimeout(() => { flower.remove(); }, (Math.random() * 3 + 2) * 1000);
+            }
+            // Gọi lại hàm tạo hoa sau 3000ms (3 giây)
+            setTimeout(createFallingFlowers, 3000);
         }
 
-        setInterval(createFlower, 300);
+        document.addEventListener("DOMContentLoaded", () => {
+            createFallingFlowers();
+        });
     </script>
     <script>
         const messages = [
@@ -199,6 +205,14 @@
         function revealGift() {
             document.getElementById('gift').classList.remove('hidden');
             document.getElementById('giftButton').classList.add('hidden');
+            // Ẩn chữ chúc mừng sau 3 giây
+            setTimeout(() => {
+                document.getElementById('congratsText').style.display = 'none';
+            }, 3000);
+            // Hiện quà (tức là tăng opacity của #gift)
+            setTimeout(() => {
+                document.getElementById('gift').style.opacity = '1';
+            }, 100);
         }
     </script>
 </body>
