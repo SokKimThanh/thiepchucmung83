@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc Mừng 8/3</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            text-align: center;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+
+        h1 {
+            font-size: 50px;
+            margin-top: 50px;
+            animation: fadeIn 3s ease-in-out;
+        }
+
+        .message-box {
+            font-size: 24px;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: inline-block;
+            animation: fadeIn 3s ease-in-out;
+        }
+
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #ff477e;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+            .button:hover {
+                background: #ff1c5c;
+            }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        img {
+            width: 300px;
+            margin-top: 20px;
+            border-radius: 15px;
+            animation: float 3s infinite ease-in-out alternate;
+        }
+
+        .electric-effect {
+            position: absolute;
+            top: 46%;
+            left: 50%;
+            width: 320px;
+            height: 480px;
+            /*            border-radius: 50%;*/
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 70%);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.6);
+            transform: translate(-50%, -50%);
+            animation: electricGlow 1.5s infinite alternate;
+
+            @media (max-width: 768px) {
+                top: 58%;
+                left: 50%;
+            }
+
+            @media (max-width: 500px) {
+                top: 67%;
+                left: 50%;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes float {
+            from {
+                transform: translateY(0px);
+            }
+
+            to {
+                transform: translateY(10px);
+            }
+        }
+
+        @keyframes electricGlow {
+            from {
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(0, 255, 255, 0.6);
+            }
+
+            to {
+                box-shadow: 0 0 30px rgba(0, 255, 255, 1), 0 0 50px rgba(0, 255, 255, 0.8);
+            }
+        }
+
+        .flower {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: url('https://cdn-icons-png.flaticon.com/128/3534/3534066.png');
+            background-size: cover;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            from {
+                transform: translateY(-100px);
+            }
+
+            to {
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Chúc Mừng Ngày Quốc Tế Phụ Nữ 8/3</h1>
+    <div class="image-container">
+
+        <button class="button" id="giftButton" onclick="revealGift()">Mở Quà</button>
+    </div>
+    <div id="gift" class="hidden">
+        🎁 Chúc mừng! Bạn đã nhận được một món quà bất ngờ! 🎁
+        <br>
+        <div class="electric-effect"></div>
+        <img src="./public/images/thiep8325vn1.png" alt="Hình chúc mừng 8/3">
+    </div>
+    <script>
+        function createFlower() {
+            const flower = document.createElement('div');
+            flower.classList.add('flower');
+            document.body.appendChild(flower);
+
+            let left = Math.random() * window.innerWidth;
+            let duration = Math.random() * 3 + 2;
+            let size = Math.random() * 20 + 10;
+
+            flower.style.left = left + 'px';
+            flower.style.animationDuration = duration + 's';
+            flower.style.width = size + 'px';
+            flower.style.height = size + 'px';
+
+            setTimeout(() => {
+                flower.remove();
+            }, duration * 1000);
+        }
+
+        setInterval(createFlower, 300);
+    </script>
+    <script>
+        const messages = [
+            "Chúc bạn luôn hạnh phúc, rạng rỡ như những đóa hoa xinh đẹp!",
+            "Chúc bạn có một ngày 8/3 thật ý nghĩa và tràn đầy yêu thương!",
+            "Mong rằng bạn luôn mạnh mẽ, tự tin và đạt được mọi ước mơ của mình!",
+            "Chúc bạn luôn xinh đẹp, hạnh phúc và thành công trong cuộc sống!",
+            "Hôm nay là ngày đặc biệt dành cho bạn! Hãy tận hưởng nó thật trọn vẹn!"
+        ];
+
+        function showRandomMessage() {
+            const messageBox = document.getElementById('message');
+            const randomIndex = Math.floor(Math.random() * messages.length);
+            messageBox.innerText = messages[randomIndex];
+            document.getElementById('giftButton').classList.remove('hidden');
+        }
+
+        function revealGift() {
+            document.getElementById('gift').classList.remove('hidden');
+            document.getElementById('giftButton').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
