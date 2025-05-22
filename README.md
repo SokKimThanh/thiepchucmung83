@@ -37,7 +37,6 @@ Công nghệ sử dụng
 
 Đóng góp
 --------
-
-Nếu bạn muốn cải thiện trang web, hãy gửi pull request hoặc mở issue để thảo luận!
+Bạn có thể fork miễn phí để tùy chỉnh mã nguồn theo ý của bạn.
 
 Chúc mừng ngày 8/3! 🌸
